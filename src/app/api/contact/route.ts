@@ -1,5 +1,12 @@
 import { site } from "@/content/site";
 import { composeEnquiry, formatPhone, invalidFields, type Enquiry } from "@/lib/enquiry";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
+
+// Per IP: 3 enquiries per 10 minutes, 10 per day
+const LIMITS = [
+  { max: 3, windowMs: 10 * 60_000 },
+  { max: 10, windowMs: 24 * 60 * 60_000 },
+];
 
 /**
  * Contact form → email, via Resend (https://resend.com).
@@ -16,6 +23,14 @@ const escape = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 export async function POST(request: Request) {
+  const { rateLimited, retryAfterSeconds } = checkRateLimit(`contact:${clientIp(request)}`, LIMITS);
+  if (rateLimited) {
+    return Response.json(
+      { error: "rate-limited", retryAfter: retryAfterSeconds },
+      { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } },
+    );
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();

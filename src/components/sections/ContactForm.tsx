@@ -25,7 +25,8 @@ export function ContactForm() {
   const [message, setMessage] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [invalid, setInvalid] = useState<Field[]>([]);
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "failed">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "failed" | "limited">("idle");
+  const [retryMinutes, setRetryMinutes] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
 
   const enquiry = (): Enquiry => ({ name, email, phone, message, needs, budget });
@@ -47,6 +48,12 @@ export function ContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...enquiry(), company: honeypot }),
       });
+      if (res.status === 429) {
+        const seconds = Number(res.headers.get("Retry-After")) || 600;
+        setRetryMinutes(Math.max(1, Math.ceil(seconds / 60)));
+        setStatus("limited");
+        return;
+      }
       if (!res.ok) throw new Error(String(res.status));
       setStatus("sent");
       requestAnimationFrame(() => heading.current?.focus());
@@ -246,6 +253,12 @@ export function ContactForm() {
               <p className="contact-form__error" role="alert">
                 Sorry, that didn&apos;t send. Try WhatsApp instead, or email{" "}
                 <a href={`mailto:${site.email}`}>{site.email}</a> directly.
+              </p>
+            )}
+            {status === "limited" && (
+              <p className="contact-form__error" role="alert">
+                You&apos;ve sent a few messages already. Please try again in about {retryMinutes}{" "}
+                {retryMinutes === 1 ? "minute" : "minutes"}, or reach me on WhatsApp instead.
               </p>
             )}
           </form>
