@@ -117,12 +117,12 @@ export const experience = {
     },
     {
       role: "Web Developer",
-      company: "Trioplus Technology",
+      company: "WebX",
       type: "Freelance",
       start: "Dec 2025",
-      end: "Mar 2026",
+      end: null as string | null,
       place: "Nepal",
-      text: "Front-end and back-end development for client websites and web apps, working with the Trioplus team.",
+      text: "Front-end and back-end development for client websites and web apps, working with the WebX team.",
       tags: ["Front-end development", "Back-end development"],
     },
     {
