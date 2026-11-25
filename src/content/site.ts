@@ -91,7 +91,7 @@ export const site = {
     needs: ["Website", "Web app", "Mobile app", "E-commerce", "Something else"],
     budgetLabel: "Rough budget",
     // Nepali rupees
-    budgets: ["Below NPR 500", "NPR 500–2,000", "NPR 2,000–5,000", "NPR 5,000 and above", "Not sure yet"],
+    budgets: ["NPR 2,200–4,000", "NPR 4,000 and above", "Not sure yet"],
     submit: "Send enquiry",
     success: "Thanks, {name}.",
     // {email} = the visitor's address
